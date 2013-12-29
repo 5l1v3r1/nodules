@@ -1,0 +1,13 @@
+{
+  "proxy": {
+    "ws": true,
+    "https": false,
+    "ssl": {},
+    "ports": {
+      "http": 80,
+      "https": 443
+    }
+  },
+  "password": "password",
+  "nodules": []
+}

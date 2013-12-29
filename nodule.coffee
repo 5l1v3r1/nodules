@@ -3,6 +3,7 @@ Handles the management and dispatching of nodules.
 ###
 
 {spawn} = require 'child_process'
+datastore = require './datastore.coffee'
 
 class Nodule
   constructor: (@data) ->
@@ -21,6 +22,8 @@ class Nodule
     @process.on 'exit', =>
       if @data.relaunch then @start()
       else @process = null
+    # TODO: here, @process.stderr and @process.stdout should be
+    # piped to output log files specific for this execution
   
   stop: ->
     @process.removeAllListeners()
@@ -37,7 +40,19 @@ class Session
       nodule.start() if nodule.data.autolaunch
   
   add: (req, res) ->
-    res.sendJSON 505, error: 'nyi'
+    try
+      newData = datastore.NoduleData.load req.body
+      addedNodule = new Nodule newData
+      @datastore.nodules.push newData
+      @nodules.push addedNodule
+      @datastore.save (err) ->
+        if err
+          res.sendJSON 500, error: err.toString()
+        else
+          addedNodule.start() if addedNodule.data.autolaunch
+          res.sendJSON 200, {}
+    catch error
+      res.sendJSON 400, error: error.toString()
 
   remove: (req, res) ->
     res.sendJSON 505, error: 'nyi'

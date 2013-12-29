@@ -35,13 +35,27 @@ class NoduleData
       throw new Error 'invalid autolaunch'
     if typeof dict.relaunch isnt 'boolean'
       throw new Error 'invalid relaunch'
+      
+    # verify the types within arrays
+    for url in dict.urls
+      if typeof url isnt 'string'
+        throw new Error 'invalid URL type'
+    for arg in dict.arguments
+      if typeof arg isnt 'string'
+        throw new Error 'invalid argument type'
+    
+    # verify the values in the environment
+    for own value, key of dict.env
+      if not typeof value is typeof key is 'string'
+        throw new Error 'invalid key/value pair in environment'
+    
     return new NoduleData(dict.path,
                           dict.identifier,
-                          dict.port, 
-                          dict.arguments, 
-                          dict.env, 
-                          dict.urls, 
-                          dict.autolaunch, 
+                          dict.port,
+                          dict.arguments,
+                          dict.env,
+                          dict.urls,
+                          dict.autolaunch,
                           dict.relaunch)
 
   @mapload: (list) -> @load d for d in list
@@ -71,8 +85,10 @@ class Configuration
   constructor: (@nodules, @proxy, @password, @path) ->
   
   save: (cb) ->
-    encoded = JSON.stringify this
-    cb fs.writeFileSync @path encoded
+    # For now, this is synchronous so that overlaps don't occur.
+    # In the future, this should be done with some sort of database.
+    encoded = JSON.stringify this, null, 2
+    cb fs.writeFileSync @path, encoded
   
   toJSON: -> nodules: @nodules, proxy: @proxy, password: @password
   

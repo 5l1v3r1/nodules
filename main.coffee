@@ -29,21 +29,25 @@ setup = (port, config) ->
   app = express()
   app.use addHelperMethod
   app.use authenticator
+  app.use express.json()
+  app.use app.router
   
   # proxy API
-  app.get '/proxy/setflag', proxy.setFlag
-  app.get '/proxy/stop', proxy.stop
-  app.get '/proxy/start', proxy.start
-  app.get '/proxy/status', proxy.status
+  app.get '/proxy/setflag', proxy.setFlag.bind proxy
+  app.get '/proxy/stop', proxy.stop.bind proxy
+  app.get '/proxy/start', proxy.start.bind proxy
+  app.get '/proxy/status', proxy.status.bind proxy
   
   # nodule API
-  app.get '/nodule/add', nodule.add
-  app.get '/nodule/remove', nodule.remove
-  app.get '/nodule/list', nodule.list
-  app.get '/nodule/edit', nodule.edit
+  app.post '/nodule/add', nodule.add.bind nodule
+  app.get '/nodule/remove', nodule.remove.bind nodule
+  app.get '/nodule/list', nodule.list.bind nodule
+  app.post '/nodule/edit', nodule.edit.bind nodule
   
   # standard 404 response
   app.get '*', (req, res) ->
+    res.sendJSON 404, error: 'unknown API call'
+  app.post '*', (req, res) ->
     res.sendJSON 404, error: 'unknown API call'
   
   # run the server and start the nodules
