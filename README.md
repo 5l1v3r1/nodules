@@ -41,6 +41,8 @@ Module Manager
   * /nodule/remove
   * /nodule/list
   * /nodule/edit
+  * /nodule/start
+  * /nodule/stop
 
 # Web Interface
 

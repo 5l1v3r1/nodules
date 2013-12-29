@@ -43,6 +43,8 @@ setup = (port, config) ->
   app.get '/nodule/remove', nodule.remove.bind nodule
   app.get '/nodule/list', nodule.list.bind nodule
   app.post '/nodule/edit', nodule.edit.bind nodule
+  app.get '/nodule/start', nodule.start.bind nodule
+  app.get '/nodule/stop', nodule.stop.bind nodule
   
   # standard 404 response
   app.get '*', (req, res) ->

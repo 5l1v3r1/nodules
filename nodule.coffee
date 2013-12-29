@@ -21,8 +21,8 @@ class Nodule
     params = env: @data.env, cwd: @data.path
     @process = spawn command, args, params
     @process.on 'exit', =>
+      @process = null
       if @data.relaunch then @start()
-      else @process = null
     @process.on 'error', =>
       @process.kill()
       @process = null
@@ -52,27 +52,24 @@ class Session
   add: (req, res) ->
     try
       newData = datastore.NoduleData.load req.body
-      for nodule in @nodules
-        if nodule.data.identifier is newData.identifier
-          return res.sendJSON 409, error: 'nodule already exists'
-      addedNodule = new Nodule newData
-      @datastore.nodules.push newData
-      @nodules.push addedNodule
-      addedNodule.start() if addedNodule.data.autolaunch
-      @saveWithCallback res
     catch error
-      res.sendJSON 400, error: error.toString()
+      return res.sendJSON 400, error: error.toString()
+    
+    for nodule in @nodules
+      if nodule.data.identifier is newData.identifier
+        return res.sendJSON 409, error: 'nodule already exists'
+    addedNodule = new Nodule newData
+    @datastore.nodules.push newData
+    @nodules.push addedNodule
+    addedNodule.start() if addedNodule.data.autolaunch
+    @saveWithCallback res    
 
   remove: (req, res) ->
-    if typeof req.query.identifier isnt 'string'
-      return res.sendJSON 400, error: 'invalid request'
-    for nodule, i in @nodules
-      if nodule.data.identifier is req.query.identifier
-        nodule.stop() if nodule.isRunning()
-        @nodules.splice i, 1
-        @datastore.nodules.splice i, 1
-        return @saveWithCallback res
-    res.sendJSON 404, error: 'nodule not found'
+    @findNodule req, res, (nodule, i) =>
+      nodule.stop() if nodule.isRunning()
+      @nodules.splice i, 1
+      @datastore.nodules.splice i, 1
+      return @saveWithCallback res
 
   list: (req, res) ->
     res.sendJSON 200, nodules: @nodules
@@ -80,23 +77,42 @@ class Session
   edit: (req, res) ->
     try
       newData = datastore.NoduleData.load req.body
-      for nodule, i in @nodules
-        if nodule.data.identifier is newData.identifier
-          # replace the nodule
-          wasRunning = nodule.isRunning()
-          nodule.stop() if wasRunning
-          nodule.data = newData
-          @datastore.nodules[i] = newData
-          nodule.start() if wasRunning
-          # save and then callback
-          return @saveWithCallback res
-      res.sendJSON 404, error: 'nodule not found'
     catch error
-      res.sendJSON 400, error: error.toString()
+      return res.sendJSON 400, error: error.toString()
+      
+    for nodule, i in @nodules
+      if nodule.data.identifier is newData.identifier
+        # replace the nodule
+        wasRunning = nodule.isRunning()
+        nodule.stop() if wasRunning
+        nodule.data = newData
+        @datastore.nodules[i] = newData
+        nodule.start() if wasRunning
+        # save and then callback
+        return @saveWithCallback res
+    res.sendJSON 404, error: 'nodule not found'
+  
+  start: (req, res) ->
+    @findNodule req, res, (nodule, i) ->
+      nodule.start()
+      res.sendJSON 200, {}
+  
+  stop: (req, res) ->
+    @findNodule req, res, (nodule, i) ->
+      nodule.stop()
+      res.sendJSON 200, {}
   
   saveWithCallback: (res) ->
     @datastore.save (err) ->
       if err then res.sendJSON 500, error: err.toString()
       else res.sendJSON 200, {}
+  
+  findNodule: (req, res, cb) ->
+    if typeof req.query.identifier isnt 'string'
+      return res.sendJSON 400, error: 'invalid request'
+    for nodule, i in @nodules
+      if nodule.data.identifier is req.query.identifier
+        return cb(nodule, i)
+    res.sendJSON 404, error: 'nodule not found'
 
 module.exports = Session
