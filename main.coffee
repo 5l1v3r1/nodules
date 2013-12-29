@@ -61,7 +61,7 @@ addHelperMethod = (req, res, next) ->
   res.sendJSON = (status, obj) ->
     res.status status
     res.set 'Content-Type': 'application/json'
-    res.end JSON.stringify obj
+    res.end (JSON.stringify obj) + '\n'
   next()
 
 authenticator = (req, res, next) ->
