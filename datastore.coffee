@@ -68,14 +68,14 @@ class ProxyConfig
     {@ws, @https, @ssl, @ports} = dict
 
 class Configuration
-  constructor: (@nodules, @proxy, @path) ->
+  constructor: (@nodules, @proxy, @password, @path) ->
   
   save: (cb) ->
     encoded = JSON.stringify this
     fs.writeFile @path encoded (err) ->
       cb err
   
-  toJSON: () -> nodules: @nodules, proxy: @proxy
+  toJSON: -> nodules: @nodules, proxy: @proxy, password: @password
   
   @load: (path, cb) ->
     fs.readFile path, (err, data) ->
@@ -86,10 +86,13 @@ class Configuration
           return cb new Error 'invalid root datatype'
         if not config.nodules instanceof Array
           return cb new Error 'invalid nodules datatype'
+        if typeof config.password != 'string'
+          return cb new Error 'invalid password datatype'
         
         nodules = NoduleData.mapload config.nodules
         proxy = new ProxyConfig config.proxy
-        cb null, new Configuration nodules, proxy, path
+        passwd= config.password
+        cb null, new Configuration nodules, proxy, passwd, path
       catch exc
         cb(exc)
 

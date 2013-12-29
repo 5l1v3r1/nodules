@@ -24,6 +24,8 @@ Web Proxy
 * Option to use certificates for different hosts
 * Configuration API
   * /proxy/setflag
+    * flags = [ws, https, http_port, https_port]
+    * value = number or "true"/"false"
   * /proxy/stop
   * /proxy/start
 
