@@ -28,6 +28,7 @@ Web Proxy
     * value = number or "true"/"false"
   * /proxy/stop
   * /proxy/start
+  * /proxy/status
 
 Module Manager
 

@@ -72,8 +72,7 @@ class Configuration
   
   save: (cb) ->
     encoded = JSON.stringify this
-    fs.writeFile @path encoded (err) ->
-      cb err
+    cb fs.writeFileSync @path encoded
   
   toJSON: -> nodules: @nodules, proxy: @proxy, password: @password
   
@@ -91,7 +90,7 @@ class Configuration
         
         nodules = NoduleData.mapload config.nodules
         proxy = new ProxyConfig config.proxy
-        passwd= config.password
+        passwd = config.password
         cb null, new Configuration nodules, proxy, passwd, path
       catch exc
         cb(exc)
