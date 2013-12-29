@@ -14,8 +14,15 @@ class ProxySession
     switch flag
       when 'ws' then
 
+  startup: (cb) ->
+    # TODO: do initial startup here
+    cb?()
+
   start: (req, res) ->
-    res.sendJSON 505, error: 'nyi'
+    @startup (err) ->
+      if err then res.sendJSON 500, error: err.toString()
+      else res.sendJSON 200, {}
+    
 
   stop: (req, res) ->
     res.sendJSON 505, error: 'nyi'

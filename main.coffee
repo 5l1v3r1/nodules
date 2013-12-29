@@ -46,7 +46,11 @@ setup = (port, config) ->
   app.get '*', (req, res) ->
     res.sendJSON 404, error: 'unknown API call'
   
+  # run the server and start the nodules
   app.listen port
+  nodule.startup()
+  proxy.startup (err) ->
+    fail 'error starting proxy: ' + err if err
 
 # adds a sendJSON method to the response object
 addHelperMethod = (req, res, next) ->

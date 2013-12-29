@@ -29,6 +29,12 @@ class Nodule
 
 class Session
   constructor: (@datastore) ->
+    # create our list of nodules
+    @nodules = (new Nodule data for data in @datastore.nodules)
+  
+  startup: ->
+    for nodule in @nodules
+      nodule.start() if nodule.data.autolaunch
   
   add: (req, res) ->
     res.sendJSON 505, error: 'nyi'
