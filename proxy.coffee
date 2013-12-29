@@ -7,7 +7,7 @@ class ProxySession
   
   setFlag: (req, res) ->
     flag = req.query.flag
-    if typeof flag != 'string'
+    if typeof flag isnt 'string'
       res.sendJSON 400, error: 'missing/invalid flag argument'
     if not flag in ['ws', 'https', 'http_port', 'https_port']
       res.sendJSON 400, error: 'unknown flag argument'

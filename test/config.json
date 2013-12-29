@@ -1,4 +1,19 @@
 {
+  "nodules": [
+    {
+      "path": "/Users/alex/Desktop/nodules/test/touch_nodule",
+      "identifier": "testcase",
+      "port": 5000,
+      "arguments": [
+        "/usr/local/Cellar/node/0.10.15/bin/node",
+        "executable.js"
+      ],
+      "env": {},
+      "urls": [],
+      "autolaunch": true,
+      "relaunch": true
+    }
+  ],
   "proxy": {
     "ws": true,
     "https": false,
@@ -8,6 +23,5 @@
       "https": 443
     }
   },
-  "password": "password",
-  "nodules": []
+  "password": "password"
 }

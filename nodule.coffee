@@ -30,8 +30,8 @@ class Nodule
     # piped to output log files specific for this execution
   
   stop: ->
-    @process.removeAllListeners()
-    @process.kill()
+    @process.removeAllListeners?()
+    @process.kill?()
     @process = null
 
   toJSON: ->
@@ -53,17 +53,13 @@ class Session
     try
       newData = datastore.NoduleData.load req.body
       for nodule in @nodules
-        if nodule.identifier is newData.identifier
-          return res.sendJSON 409, 'nodule already exists'
+        if nodule.data.identifier is newData.identifier
+          return res.sendJSON 409, error: 'nodule already exists'
       addedNodule = new Nodule newData
       @datastore.nodules.push newData
       @nodules.push addedNodule
-      @datastore.save (err) ->
-        if err
-          res.sendJSON 500, error: err.toString()
-        else
-          addedNodule.start() if addedNodule.data.autolaunch
-          res.sendJSON 200, {}
+      addedNodule.start() if addedNodule.data.autolaunch
+      @saveWithCallback res
     catch error
       res.sendJSON 400, error: error.toString()
 
@@ -75,9 +71,8 @@ class Session
         nodule.stop() if nodule.isRunning()
         @nodules.splice i, 1
         @datastore.nodules.splice i, 1
-        return res.sendJSON 200, {}
+        return @saveWithCallback res
     res.sendJSON 404, error: 'nodule not found'
-      
 
   list: (req, res) ->
     res.sendJSON 200, nodules: @nodules
@@ -87,13 +82,21 @@ class Session
       newData = datastore.NoduleData.load req.body
       for nodule, i in @nodules
         if nodule.data.identifier is newData.identifier
-          nodule.stop() is nodule.isRunning()
+          # replace the nodule
+          wasRunning = nodule.isRunning()
+          nodule.stop() if wasRunning
           nodule.data = newData
-          @datamanager.nodules[i] = newData
-          nodule.start()
-          return res.sendJSON 200, {}
+          @datastore.nodules[i] = newData
+          nodule.start() if wasRunning
+          # save and then callback
+          return @saveWithCallback res
       res.sendJSON 404, error: 'nodule not found'
     catch error
       res.sendJSON 400, error: error.toString()
+  
+  saveWithCallback: (res) ->
+    @datastore.save (err) ->
+      if err then res.sendJSON 500, error: err.toString()
+      else res.sendJSON 200, {}
 
 module.exports = Session

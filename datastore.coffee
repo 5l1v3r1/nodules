@@ -97,11 +97,11 @@ class Configuration
       return cb err if err
       try
         config = JSON.parse data.toString();
-        if typeof config != 'object'
+        if typeof config isnt 'object'
           return cb new Error 'invalid root datatype'
         if not config.nodules instanceof Array
           return cb new Error 'invalid nodules datatype'
-        if typeof config.password != 'string'
+        if typeof config.password isnt 'string'
           return cb new Error 'invalid password datatype'
         
         nodules = NoduleData.mapload config.nodules

@@ -11,7 +11,7 @@ fail = (msg) ->
   return process.stderr.write msg + '\n', -> process.exit 1
 
 main = ->
-  if process.argv.length != 4
+  if process.argv.length isnt 4
     return fail 'Usage: coffee nodule.coffee <control port> <configuration>'
   if isNaN port = parseInt process.argv[2]
     return fail 'error: invalid control port'
