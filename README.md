@@ -1,4 +1,5 @@
 # Abstract
+
 Nodules should provide a simple mechanism for deploying multiple isolated web applications on one host machine. It needs to support process management and a mechanism for relaunching crashed processes. It must provide a unified HTTP and HTTPS proxy with full support for WebSockets. This proxy will allow routing to local ports (inherently belonging to running nodules), and must support SNI for the use of multiple SSL certificates.
 
 # Internal Implementation
