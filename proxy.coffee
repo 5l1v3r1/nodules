@@ -1,10 +1,12 @@
-###
-Handles the management and execution of the HTTP/HTTPS proxy.
-###
-
 httpProxy = require 'http-proxy'
 fs = require 'fs'
+url = require 'url'
+path = require 'path'
 
+###
+This class is an abstract HTTP and HTTPS proxy
+with full support for SNI and WebSockets.
+###
 class Proxy
   constructor: ->
     @proxy = new httpProxy.RoutingProxy()
@@ -61,14 +63,17 @@ class Proxy
 
   _serverCallback: (req, res) ->
     forward = @forwardHost req
+    return res.close() if not forward?
     @proxy.proxyRequest req, res, forward
 
   _upgradeCallback: (req, socket, head) ->
     forward = @forwardHost req
+    return socket.close() if not forward?
     @proxy.proxyWebSocketRequest req, socket, head, forward
 
   _sniCallback: (hostname) ->
-    throw new Error 'nyi'
+    # this shouldn't be too difficult
+    
     
   # Configuration
 
@@ -81,7 +86,11 @@ class Proxy
     @https?.listen? ports.https
     @http?.listen? ports.http
 
-class ProxySession extends proxy
+###
+A concrete Proxy subclass which is configured via HTTP and
+which saves its configuration using the nodule datastore.
+###
+class ProxySession extends Proxy
   constructor: (@nodule) -> super()
   
   setFlag: (req, res) ->
@@ -143,8 +152,31 @@ class ProxySession extends proxy
   getPorts: -> @nodule.datastore.proxy.ports
   
   forwardHost: (req) ->
-    # perform routing logic here
-    throw new Error 'nyi'
+    parsed = url.parse req.url
+    root = path.normalize(parsed.pathname).split path.delimiter
+    hostname = parsed.hostname
     
+    # iterate and find the longest subpath that contains
+    # the requested path; return the port for the nodule
+    # that claims ownership of that path
+    matchedComps = []
+    matchedHost = null
+    for nodule in @nodule.datastore.nodules
+      for aURL in nodule.urls
+        aParsed = url.parse aURL
+        aComps = path.normalize(aParsed.pathname).split path.delimiter
+        
+        continue if aParsed.hostname isnt hostname
+        continue if aComps.length < matchedComps.length
+        continue if not ProxySession::_isPathContained root, aComps
+        matchedComps = aComps
+        matchedHost = port: nodule.port
+    matchedHost?.host = 'localhost'
+    return matchedHost
+  
+  @_isPathContained: (root, sub) ->
+    return false if sub.length < root.length
+    return false if comp isnt sub[i] for comp, i in root
+    return true
 
 module.exports = ProxySession
