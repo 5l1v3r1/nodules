@@ -2,8 +2,13 @@
 Handles the management and execution of the HTTP/HTTPS proxy.
 ###
 
+httpProxy = require('http-proxy')
+
 class ProxySession
   constructor: (@nodule) ->
+    @proxy = new httpProxy.RoutingProxy()
+    @http = null
+    @https = null
   
   setFlag: (req, res) ->
     flag = req.query.flag
@@ -15,7 +20,11 @@ class ProxySession
       when 'ws' then
 
   startup: (cb) ->
-    # TODO: do initial startup here
+    cbFunc = @serverCallback.bind this
+    @http = http.createServer cbFunc
+    @http.listen()
+    
+    if 
     cb?()
 
   start: (req, res) ->
@@ -29,5 +38,9 @@ class ProxySession
 
   status: (req, res) ->
     res.sendJSON 200, running: false
+  
+  serverCallback: (req, res) ->
+    
+  
 
 module.exports = ProxySession
