@@ -71,6 +71,8 @@ class ProxyConfig
       throw new Error 'invalid ws flag'
     if typeof dict.https isnt 'boolean'
       throw new Error 'invalid https flag'
+    if typeof dict.http isnt 'boolean'
+      throw new Error 'invalid HTTP flag'
     if typeof dict.ssl isnt 'object'
       throw new Error 'invalid ssl certificates attribute'
     if typeof dict.ports isnt 'object'
@@ -79,7 +81,21 @@ class ProxyConfig
       throw new Error 'invalid http port'
     if typeof dict.ports.https isnt 'number'
       throw new Error 'invalid https port'
-    {@ws, @https, @ssl, @ports} = dict
+    {@ws, @https, @http, @ssl, @ports} = dict
+    throw new Error 'invalid ssl object' if not @validateSSL
+  
+  validateSSL: ->
+    return false if typeof @ssl.default_key != 'string'
+    return false if typeof @ssl.default_cert != 'string'
+    return false if typeof @ssl.sni != 'object'
+    for own key, obj of @ssl.sni
+      return false if typeof obj != 'object'
+      return false if typeof obj.key != 'string'
+      return false if typeof obj.cert != 'string'
+      if obj.ca?
+        return false if not obj.ca instanceof Array
+        return false if typeof obj != 'string' for obj in obj.ca
+    return true
 
 class Configuration
   constructor: (@nodules, @proxy, @password, @path) ->
