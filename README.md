@@ -2,6 +2,12 @@
 
 Nodules should provide a simple mechanism for deploying multiple isolated web applications on one host machine. It needs to support process management and a mechanism for relaunching crashed processes. It must provide a unified HTTP and HTTPS proxy with full support for WebSockets. This proxy will allow routing to local ports (inherently belonging to running nodules), and must support SNI for the use of multiple SSL certificates.
 
+# Progress
+
+I have created a process manager and a persistent datastore mechanism for nodules.  Nodules can be added, listed, started, stopped, and changed voa a web API or through the helper commands in `control/`.
+
+I am now going to direct my attention to proxying traffic. The proxy will likewise be controlled via a web API which I have already begun to outline.
+
 # Internal Implementation
 
 Nodule Database Entry
