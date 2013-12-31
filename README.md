@@ -6,7 +6,9 @@ Nodules should provide a simple mechanism for deploying multiple isolated web ap
 
 I have created a process manager and a persistent datastore mechanism for nodules.  Nodules can be added, listed, started, stopped, and changed voa a web API or through the helper commands in `control/`.
 
-I am now going to direct my attention to proxying traffic. The proxy will likewise be controlled via a web API which I have already begun to outline.
+I am now working on implementing and testing the proxy. I have yet to create command-line tools for managing the proxy, but I have tested it with HTTP and websockets. I have yet to test it with an SSL certificate, but I will do so soon.
+
+My next step after this will be to generally reorganize this to be suitable for `npm`. I want to add a Cakefile and make an easy-to-use unified control command and a control Node API.
 
 # Internal Implementation
 
