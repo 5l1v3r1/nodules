@@ -9,6 +9,7 @@ document =
   path: __dirname + '/ws_test_server'
   identifier: 'wstest'
   port: 5003
+  host: 'localhost'
   arguments: ['/usr/bin/env', 'coffee', 'main.coffee', '5003']
   env: process.env
   urls: ['http://localhost:8080/ws_test',

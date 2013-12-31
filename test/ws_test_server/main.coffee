@@ -33,4 +33,8 @@ io.sockets.on 'connection', (socket) ->
     console.log 'socket closed'
 
 app.use '/ws_test', express.static __dirname + '/assets'
+app.get '/ws_test/getheaders', (req, res) ->
+  res.writeHead 200, 'Content-Type': 'application/json'
+  res.end JSON.stringify req.headers
+  
 server.listen parseInt process.argv[2]
