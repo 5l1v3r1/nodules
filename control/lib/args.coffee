@@ -20,7 +20,7 @@ class NoduleArgs
     i = 3
     while i < index
       arg = argv[i]
-      if result = /^--(.*?)=/.exec arg
+      if result = /^--(.*?)=(.*)/.exec arg
         @env[result[1]] = result[2]
       else if arg is '--url'
         throw 'missing URL' if i is index - 1

@@ -1,8 +1,8 @@
 express = require 'express'
-datastore = require './datastore.coffee'
+datastore = require './source/datastore.coffee'
 
-Session = require './nodule.coffee'
-ProxySession = require './proxy.coffee'
+Session = require './source/nodule.coffee'
+ProxySession = require './source/proxy.coffee'
 
 nodule = null;
 proxy = null;

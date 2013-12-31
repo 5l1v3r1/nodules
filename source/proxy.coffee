@@ -75,7 +75,7 @@ class Proxy
 
   _upgradeCallback: (prot, req, socket, head) ->
     forward = @forwardHost req, prot
-    return socket.close() if not forward?
+    return socket.end() if not forward?
     @proxy.proxyWebSocketRequest req, socket, head, forward
 
   _sniCallback: (hostname) ->

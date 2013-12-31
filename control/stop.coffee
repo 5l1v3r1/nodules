@@ -1,2 +1,2 @@
 control_cmd = require './lib/control.coffee'
-control_cmd 'stop.coffee', 'stop'
+module.exports = control_cmd.bind null, 'stop.coffee', 'stop'
