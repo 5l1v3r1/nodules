@@ -1,4 +1,3 @@
-{NoduleArgs} = require('./lib/args.coffee')
 http = require 'http'
 
 printOptions = ->

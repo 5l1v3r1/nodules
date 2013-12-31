@@ -1,6 +1,6 @@
 #!/usr/bin/env coffee
 
-commands = ['add', 'edit', 'list', 'start', 'stop', 'delete',
+commands = ['passwd', 'add', 'edit', 'list', 'start', 'stop', 'delete',
             'proxy-flag', 'proxy-status', 'proxy-stop', 'proxy-start']
 
 if process.argv.length < 3

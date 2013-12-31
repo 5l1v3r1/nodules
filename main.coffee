@@ -1,6 +1,6 @@
 express = require 'express'
 datastore = require './source/datastore.coffee'
-
+crypto = require 'crypto'
 Session = require './source/nodule.coffee'
 ControllableProxy = require './source/proxy.coffee'
 
@@ -31,6 +31,8 @@ setup = (port, config) ->
   app.use authenticator
   app.use express.json()
   app.use app.router
+  
+  app.get '/api/passwd', passwdHandler
   
   # proxy API
   app.get '/proxy/setflag', proxy.setFlag.bind proxy
@@ -67,8 +69,21 @@ addHelperMethod = (req, res, next) ->
   next()
 
 authenticator = (req, res, next) ->
-  if req.query.password isnt nodule.datastore.password
+  shasum = crypto.createHash 'sha1'
+  shasum.update req.query.password
+  digest = shasum.digest 'hex'
+  if digest isnt nodule.datastore.password
     res.sendJSON 401, error: 'missing/incorrect password'
   else next()
+
+passwdHandler = (req, res) ->
+  if typeof req.query.new != 'string'
+    return res.sendJSON 401, error: 'missing/invalid new field'
+  if not /^[0-9a-f]{40}$/i.test req.query.new
+    return res.sendJSON 401, error: 'new field must be 20 bytes in hex'
+  nodule.datastore.password = req.query.new.toLowerCase()
+  nodule.datastore.save (err) ->
+    if err then res.sendJSON 500, error: err.toString()
+    else res.sendJSON 200, {}
 
 main()
