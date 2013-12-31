@@ -2,7 +2,7 @@
     "name": "nodules",
     "description": "a deployment tool for node.js",
     "author": "Alex Nichol <unixpickle@gmail.com>",
-    "repository": "https://github.com/unixpickle/nodules.git"
+    "repository": "https://github.com/unixpickle/nodules.git",
     "dependencies": {
         "express": "3.4.x",
         "coffee-script": "1.6.x",
