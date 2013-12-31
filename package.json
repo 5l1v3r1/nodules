@@ -18,6 +18,6 @@
     },
     "bin": {
         "nodule": "./bin/nodule",
-        "cake": "./bin/nodule-server"
+        "nodule-server": "./bin/nodule-server"
     }
 }
