@@ -17,7 +17,7 @@
         "ws://localhost:8080/ws_test"
       ],
       "autolaunch": true,
-      "relaunch": false
+      "relaunch": true
     }
   ],
   "proxy": {

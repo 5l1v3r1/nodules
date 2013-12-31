@@ -29,7 +29,7 @@ class Proxy
   # Initialization and destruction
   
   startup: (cb) ->
-    return if @active
+    return cb? new Error 'already running' if @active
     @active = true
     
     # create HTTP server
@@ -97,7 +97,7 @@ class Proxy
 A concrete Proxy subclass which is configured via HTTP and
 which saves its configuration using the nodule datastore.
 ###
-class ProxySession extends Proxy
+class ControllableProxy extends Proxy
   constructor: (@nodule) -> super()
   
   setFlag: (req, res) ->
@@ -175,7 +175,7 @@ class ProxySession extends Proxy
         continue if aParsed.host isnt hostname
         continue if aComps.length < matchedComps.length
         continue if aParsed.protocol isnt usedProtocol
-        continue if not ProxySession._isPathContained aComps, reqComps
+        continue if not ControllableProxy._isPathContained aComps, reqComps
         matchedComps = aComps
         matchedHost = port: nodule.port
     matchedHost?.host = 'localhost'
@@ -187,4 +187,4 @@ class ProxySession extends Proxy
       return false if comp isnt sub[i]
     return true
 
-module.exports = ProxySession
+module.exports = ControllableProxy

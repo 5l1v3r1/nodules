@@ -2,7 +2,7 @@ express = require 'express'
 datastore = require './source/datastore.coffee'
 
 Session = require './source/nodule.coffee'
-ProxySession = require './source/proxy.coffee'
+ControllableProxy = require './source/proxy.coffee'
 
 nodule = null;
 proxy = null;
@@ -24,7 +24,7 @@ main = ->
 
 setup = (port, config) ->
   nodule = new Session config
-  proxy = new ProxySession nodule
+  proxy = new ControllableProxy nodule
   
   app = express()
   app.use addHelperMethod

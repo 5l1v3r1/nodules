@@ -1,9 +1,14 @@
 #!/usr/bin/env coffee
 
-commands = ['add', 'edit', 'list', 'start', 'stop', 'delete']
+commands = ['add', 'edit', 'list', 'start', 'stop', 'delete',
+            'proxy-flag', 'proxy-status', 'proxy-stop', 'proxy-start']
 
 if process.argv.length < 3
   console.log 'Usage: ./nodule <command>'
+  console.log '\ncommands:\n'
+  for cmd in commands
+    console.log '  ' + cmd
+  console.log ''
   process.exit 1
 
 if not process.argv[2] in commands
