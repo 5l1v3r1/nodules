@@ -1,8 +1,8 @@
+#!/usr/bin/env coffee
+
 express = require 'express'
-datastore = require './source/datastore.coffee'
+{datastore, Session, ControllableProxy} = require 'nodule'
 crypto = require 'crypto'
-Session = require './source/nodule.coffee'
-ControllableProxy = require './source/proxy.coffee'
 
 nodule = null;
 proxy = null;
