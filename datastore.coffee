@@ -82,7 +82,7 @@ class ProxyConfig
     if typeof dict.ports.https isnt 'number'
       throw new Error 'invalid https port'
     {@ws, @https, @http, @ssl, @ports} = dict
-    throw new Error 'invalid ssl object' if not @validateSSL
+    throw new Error 'invalid ssl object' if not @validateSSL()
   
   validateSSL: ->
     return false if typeof @ssl.default_key != 'string'
@@ -94,7 +94,7 @@ class ProxyConfig
       return false if typeof obj.cert != 'string'
       if obj.ca?
         return false if not obj.ca instanceof Array
-        return false if typeof obj != 'string' for obj in obj.ca
+        return false if typeof a != 'string' for a in obj.ca
     return true
 
 class Configuration
@@ -119,13 +119,12 @@ class Configuration
           return cb new Error 'invalid nodules datatype'
         if typeof config.password isnt 'string'
           return cb new Error 'invalid password datatype'
-        
         nodules = NoduleData.mapload config.nodules
         proxy = new ProxyConfig config.proxy
         passwd = config.password
-        cb null, new Configuration nodules, proxy, passwd, path
       catch exc
-        cb(exc)
+        return cb(exc)
+      cb null, new Configuration nodules, proxy, passwd, path
 
 exports.Configuration = Configuration;
 exports.NoduleData = NoduleData;

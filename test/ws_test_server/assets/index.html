@@ -1,0 +1,20 @@
+<html>
+  <head>
+    <title>WS Test</title>
+    <script src="/ws_test/socket.io/socket.io.js" type="text/javascript"></script>
+    <script type="text/javascript">
+    
+      var socket = io.connect('http://localhost:8080',
+                              {resource: 'ws_test/socket.io'});
+      socket.on('message', function (data) {
+        document.getElementById('ping').innerHTML = 'Ping ' + data.index;
+        setTimeout(function() {
+          socket.emit('echo', {});
+        }, 1000);
+      });
+    </script>
+  </head>
+  <body>
+    <div id="ping">Ping -1</div>
+  </body>
+</html>

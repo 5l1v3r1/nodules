@@ -6,14 +6,15 @@ if process.argv.length isnt 4
 
 password = process.argv[2]
 document =
-  path: __dirname + '/touch_nodule'
-  identifier: 'testcase'
-  port: 5000
-  arguments: [process.execPath, 'executable.js']
-  env: {}
-  urls: []
+  path: __dirname + '/ws_test_server'
+  identifier: 'wstest'
+  port: 5003
+  arguments: ['/usr/bin/env', 'coffee', 'main.coffee', '5003']
+  env: process.env
+  urls: ['http://localhost:8080/ws_test',
+         'ws://localhost:8080/ws_test']
   autolaunch: true
-  relaunch: true
+  relaunch: false
 
 encoded = JSON.stringify document
 

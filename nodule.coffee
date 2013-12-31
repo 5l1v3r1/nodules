@@ -4,6 +4,7 @@ Handles the management and dispatching of nodules.
 
 {spawn} = require 'child_process'
 datastore = require './datastore.coffee'
+logger = require './logger.coffee'
 
 class Nodule
   constructor: (@data) ->
@@ -26,8 +27,7 @@ class Nodule
     @process.on 'error', =>
       @process.kill()
       @process = null
-    # TODO: here, @process.stderr and @process.stdout should be
-    # piped to output log files specific for this execution
+    logger.logProcess @process, @data.path
   
   stop: ->
     @process.removeAllListeners?()

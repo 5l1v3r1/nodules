@@ -2,6 +2,9 @@ httpProxy = require 'http-proxy'
 fs = require 'fs'
 url = require 'url'
 path = require 'path'
+crypto = require 'crypto'
+http = require 'http'
+{loadFileFields} = require './util.coffee'
 
 ###
 This class is an abstract HTTP and HTTPS proxy
@@ -12,7 +15,7 @@ class Proxy
     @proxy = new httpProxy.RoutingProxy()
     @http = null
     @https = null
-    active = false
+    @active = false
   
   # Getters to override
   
@@ -26,63 +29,67 @@ class Proxy
   # Initialization and destruction
   
   startup: (cb) ->
-    return if active
-    active = true
-    cbFunc = @_serverCallback.bind this
+    return if @active
+    @active = true
     
     # create HTTP server
     if @isHTTPEnabled()
-      @http = http.createServer cbFunc
-    if not @isHTTPSEnabled
+      @http = http.createServer @_serverCallback.bind this, 'http:'
+    if not @isHTTPSEnabled()
       @_configureAndListen()
       return cb?()
     
     # create the HTTPS server
     sslConfig = @getSSLConfiguration()
-    fs.readFile sslConfig.default_key, (err, key) =>
-      return @shutdown(), cb?(err) if err
-      fs.readFile sslConfig.default_cert, (err, cert) =>
-        return @shutdown(), cb?(err) if err
-        opts =
-          key: key
-          cert: cert
-          SNICallback: @sniCallback.bind this
-        @https = https.createServer opts, cbFunc
-        @_configureAndListen()
-        cb?()
+    loadFileFields sslConfig, (err, obj) =>
+      if err
+        @http = null
+        @active = false
+        return cb? err
+      @loadedSSL = obj
+      opts =
+        key: obj.default_key
+        cert: obj.default_cert
+        SNICallback: @_serverCallback.bind this, 'https:'
+      @https = https.createServer opts, cbFunc
+      @_configureAndListen()
+      cb?()
 
   shutdown: (cb) ->
     @http?.close()
     @https?.close()
     @http = null
     @https = null
-    active = false
+    @loadedSSL = null
+    @active = false
     cb?()
 
   # Callbacks
 
-  _serverCallback: (req, res) ->
-    forward = @forwardHost req
-    return res.close() if not forward?
+  _serverCallback: (prot, req, res) ->
+    forward = @forwardHost req, prot
+    if not forward?
+      res.writeHead 404, {'Content-Type': 'text/html'}
+      return res.end 'No forward rule found'
     @proxy.proxyRequest req, res, forward
 
-  _upgradeCallback: (req, socket, head) ->
-    forward = @forwardHost req
+  _upgradeCallback: (prot, req, socket, head) ->
+    forward = @forwardHost req, prot
     return socket.close() if not forward?
     @proxy.proxyWebSocketRequest req, socket, head, forward
 
   _sniCallback: (hostname) ->
-    # this shouldn't be too difficult
-    
-    
+    sniConfig = @nodules.datastore.proxy.ssl.sni
+    information = sniConfig[hostname]
+    return crypto.createCredentials(information).context
+  
   # Configuration
-
+  
   _configureAndListen: (server) ->
     ports = @getPorts()
     if @isWebSocketsEnabled()
-      ugHandler = @upgradeCallback.bind this
-      @http?.on? 'upgrade' upHandler
-      @https?.on? 'upgrade' upHandler
+      @http?.on? 'upgrade', @_upgradeCallback.bind this, 'ws:'
+      @https?.on? 'upgrade', @_upgradeCallback.bind this, 'wss:'
     @https?.listen? ports.https
     @http?.listen? ports.http
 
@@ -139,7 +146,7 @@ class ProxySession extends Proxy
 
   status: (req, res) ->
     info = 
-      running: @active,
+      running: @active
       configuration: @nodule.datastore.proxy
     res.sendJSON 200, info
   
@@ -151,10 +158,10 @@ class ProxySession extends Proxy
   isWebSocketsEnabled: -> @nodule.datastore.proxy.ws
   getPorts: -> @nodule.datastore.proxy.ports
   
-  forwardHost: (req) ->
+  forwardHost: (req, usedProtocol) ->
     parsed = url.parse req.url
-    root = path.normalize(parsed.pathname).split path.delimiter
-    hostname = parsed.hostname
+    reqComps = path.normalize(parsed.pathname).split '/'
+    hostname = req.headers.host
     
     # iterate and find the longest subpath that contains
     # the requested path; return the port for the nodule
@@ -164,11 +171,11 @@ class ProxySession extends Proxy
     for nodule in @nodule.datastore.nodules
       for aURL in nodule.urls
         aParsed = url.parse aURL
-        aComps = path.normalize(aParsed.pathname).split path.delimiter
-        
-        continue if aParsed.hostname isnt hostname
+        aComps = path.normalize(aParsed.pathname).split '/'
+        continue if aParsed.host isnt hostname
         continue if aComps.length < matchedComps.length
-        continue if not ProxySession::_isPathContained root, aComps
+        continue if aParsed.protocol isnt usedProtocol
+        continue if not ProxySession._isPathContained aComps, reqComps
         matchedComps = aComps
         matchedHost = port: nodule.port
     matchedHost?.host = 'localhost'
@@ -176,7 +183,8 @@ class ProxySession extends Proxy
   
   @_isPathContained: (root, sub) ->
     return false if sub.length < root.length
-    return false if comp isnt sub[i] for comp, i in root
+    for comp, i in root
+      return false if comp isnt sub[i]
     return true
 
 module.exports = ProxySession

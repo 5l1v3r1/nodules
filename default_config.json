@@ -2,7 +2,12 @@
   "proxy": {
     "ws": true,
     "https": false,
-    "ssl": {},
+    "http": true,
+    "ssl": {
+      "default_key": "",
+      "default_cert": "",
+      "sni": []
+    },
     "ports": {
       "http": 80,
       "https": 443

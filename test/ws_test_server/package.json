@@ -1,0 +1,11 @@
+{
+    "name": "ws_test_server",
+    "description": "a node.js websockets server with HTTPS",
+    "author": "Alex Nichol <unixpickle@gmail.com>",
+    "dependencies": {
+        "express": "3.4.x",
+        "coffee-script": "1.6.x",
+        "socket.io": "0.9.x"
+    },
+    "version": "0.0.1"
+}
