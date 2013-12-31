@@ -182,6 +182,7 @@ class ControllableProxy extends Proxy
   _saveAndRestart: (req, res) ->
     @nodule.datastore.save (err) =>
       return res.sendJSON 500, error: err.toString() if err
+      return res.sendJSON 200, {} if not @active
       @shutdown (err) =>
         return res.sendJSON 500, error: err.toString() if err
         @start(req, res)

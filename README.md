@@ -77,7 +77,7 @@ Start or stop the proxy like this:
 	nodule proxy-start password 8000
 	nodule proxy-stop password 8000
 
-Set a flag on the proxy using `nodule proxy-setflag`. Edit the certificates configuration using `nodule proxy-setcert`.
+Set a flag on the proxy using `nodule proxy-flag`. Edit the certificates configuration using `nodule proxy-setcert`.
 
 # Security
 

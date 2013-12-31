@@ -24,7 +24,8 @@ class Nodule
     @process.on 'exit', =>
       @process = null
       if @data.relaunch then @start()
-    @process.on 'error', =>
+    @process.on 'error', (err) =>
+      console.log err
       @process.kill()
       @process = null
     logger.logProcess @process, @data.path
