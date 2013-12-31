@@ -90,6 +90,10 @@ class ProxyConfig
   validateSSL: ->
     return false if typeof @ssl.default_key != 'string'
     return false if typeof @ssl.default_cert != 'string'
+    if @ssl.default_ca?
+      return false if not @ssl.default_ca instanceof Array
+      for a in @ssl.default_ca
+        return false if typeof a != 'string'
     return false if typeof @ssl.sni != 'object'
     for own key, obj of @ssl.sni
       return false if typeof obj != 'object'

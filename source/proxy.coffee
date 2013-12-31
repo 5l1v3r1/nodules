@@ -4,6 +4,7 @@ url = require 'url'
 path = require 'path'
 crypto = require 'crypto'
 http = require 'http'
+https = require 'https'
 {loadFileFields} = require './util.coffee'
 
 ###
@@ -50,8 +51,10 @@ class Proxy
       opts =
         key: obj.default_key
         cert: obj.default_cert
-        SNICallback: @_serverCallback.bind this, 'https:'
-      @https = https.createServer opts, cbFunc
+        SNICallback: @_sniCallback.bind this
+      if obj.default_ca?
+        opts.ca = obj.default_ca
+      @https = https.createServer opts, @_serverCallback.bind this, 'https:'
       @_configureAndListen()
       cb?()
 
@@ -79,8 +82,16 @@ class Proxy
     @proxy.proxyWebSocketRequest req, socket, head, forward
 
   _sniCallback: (hostname) ->
-    sniConfig = @nodules.datastore.proxy.ssl.sni
-    information = sniConfig[hostname]
+    information = @loadedSSL.sni[hostname]
+    
+    # create the default credentials if this domain wasn't reg'd
+    if not information?
+      information = 
+        cert: @loadedSSL.default_cert
+        key: @loadedSSL.default_key
+      information.ca = @loadedSSL.default_ca if @loadedSSL.default_ca?
+    
+    # create our credential context
     return crypto.createCredentials(information).context
   
   # Configuration
@@ -126,13 +137,7 @@ class ControllableProxy extends Proxy
       switch flag
         when 'http_port' then proxy.ports.http = setting
         when 'https_port' then proxy.ports.https = setting
-        
-    # save and restart
-    @nodule.datastore.save (err) =>
-      return res.sendJSON 500, error: err.toString() if err
-      @shutdown (err) =>
-        return res.sendJSON 500, error: err.toString() if err
-        @start(req, res)
+    @_saveAndRestart req, res
 
   start: (req, res) ->
     @startup (err) ->
@@ -149,6 +154,37 @@ class ControllableProxy extends Proxy
       running: @active
       configuration: @nodule.datastore.proxy
     res.sendJSON 200, info
+  
+  setCertificate: (req, res) ->
+    if typeof req.body.entry.cert != 'string'
+      return res.sendJSON 400, error: 'invalid cert argument'
+    if typeof req.body.entry.key != 'string'
+      return res.sendJSON 400, error: 'invalid key argument'
+    if req.body.entry.ca?
+      if not req.body.entry.ca instanceof Array
+        return res.sendJSON 400, error: 'invalid ca argument'
+      for a in req.body.entry.ca
+        if typeof a != 'string'
+          return res.sendJSON 400, error: 'invalid ca argument'
+    # register the certificate
+    if req.body.domain?
+      @nodule.datastore.proxy.ssl.sni[req.body.domain] = req.body.entry
+    else
+      @nodule.datastore.proxy.ssl.default_cert = req.body.entry.cert
+      @nodule.datastore.proxy.ssl.default_key = req.body.entry.key
+      if req.body.entry.ca
+        @nodule.datastore.proxy.ssl.default_ca = req.body.entry.ca
+      else delete @nodule.datastore.proxy.ssl.default_ca
+    @_saveAndRestart req, res
+  
+  # Private
+  
+  _saveAndRestart: (req, res) ->
+    @nodule.datastore.save (err) =>
+      return res.sendJSON 500, error: err.toString() if err
+      @shutdown (err) =>
+        return res.sendJSON 500, error: err.toString() if err
+        @start(req, res)
   
   # Overridden
   

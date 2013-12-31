@@ -39,6 +39,7 @@ setup = (port, config) ->
   app.get '/proxy/stop', proxy.stop.bind proxy
   app.get '/proxy/start', proxy.start.bind proxy
   app.get '/proxy/status', proxy.status.bind proxy
+  app.post '/proxy/setcert', proxy.setCertificate.bind proxy
   
   # nodule API
   app.post '/nodule/add', nodule.add.bind nodule

@@ -1,7 +1,8 @@
 #!/usr/bin/env coffee
 
 commands = ['passwd', 'add', 'edit', 'list', 'start', 'stop', 'delete',
-            'proxy-flag', 'proxy-status', 'proxy-stop', 'proxy-start']
+            'proxy-flag', 'proxy-status', 'proxy-stop', 'proxy-start',
+            'proxy-setcert']
 
 if process.argv.length < 3
   console.log 'Usage: ./nodule <command>'
