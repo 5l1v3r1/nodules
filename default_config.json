@@ -6,7 +6,7 @@
     "ssl": {
       "default_key": "",
       "default_cert": "",
-      "sni": []
+      "sni": {}
     },
     "ports": {
       "http": 80,

@@ -18,7 +18,7 @@ Then, create your default configuration file and save it as `config.json`:
         "ssl": {
           "default_key": "",
           "default_cert": "",
-          "sni": []
+          "sni": {}
         },
         "ports": {
           "http": 80,
