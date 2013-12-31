@@ -184,6 +184,7 @@ class ControllableProxy extends Proxy
   @_isPathContained: (root, sub) ->
     return false if sub.length < root.length
     for comp, i in root
+      return true if comp == '' and i == root.length - 1
       return false if comp isnt sub[i]
     return true
 
