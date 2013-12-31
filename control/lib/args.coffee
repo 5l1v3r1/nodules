@@ -7,7 +7,7 @@ class NoduleArgs
     throw 'not enough arguments' if argv.length < 4
     @path = path.resolve argv[0]
     @identifier = argv[1]
-    throw 'invalid port' if isNaN @port = parseInt(argv[2])
+    throw 'invalid port' if isNaN @port = parseInt argv[2]
     index = argv.indexOf '--args'
     throw '--args must exist' if index < 0
     @arguments = argv[index + 1..]
@@ -15,9 +15,10 @@ class NoduleArgs
     @env = {}
     @autolaunch = false
     @relaunch = false
+    @host = argv[3]
     
     # process the URLs and environment variables
-    i = 3
+    i = 4
     while i < index
       arg = argv[i]
       if result = /^--(.*?)=(.*)/.exec arg
@@ -43,8 +44,9 @@ class NoduleArgs
         return @arguments[0] = thePath
   
   @usage: ->
-    str = '<path> <identifier> <port> [--envvar=envval, ...]\n' +
-          '       [--url x, ...] [--autolaunch] [--autorelaunch] --args <args>'
+    str = '<path> <identifier> <port> <host> [--envvar=envval, ...]\n' +
+          '       [--url x, ...] [--autolaunch] [--autorelaunch]' +
+          ' --args <args>'
     return str
 
 exports.NoduleArgs = NoduleArgs;

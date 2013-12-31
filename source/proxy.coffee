@@ -168,7 +168,9 @@ class ControllableProxy extends Proxy
     # that claims ownership of that path
     matchedComps = []
     matchedHost = null
-    for nodule in @nodule.datastore.nodules
+    for aNodule in @nodule.nodules
+      continue if not aNodule.isRunning()
+      nodule = aNodule.data
       for aURL in nodule.urls
         aParsed = url.parse aURL
         aComps = path.normalize(aParsed.pathname).split '/'
@@ -177,8 +179,7 @@ class ControllableProxy extends Proxy
         continue if aParsed.protocol isnt usedProtocol
         continue if not ControllableProxy._isPathContained aComps, reqComps
         matchedComps = aComps
-        matchedHost = port: nodule.port
-    matchedHost?.host = 'localhost'
+        matchedHost = port: nodule.port, host: nodule.host
     return matchedHost
   
   @_isPathContained: (root, sub) ->

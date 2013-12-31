@@ -13,7 +13,7 @@ An object which represents the configuration of a nodule.
 ###
 class NoduleData
   
-  constructor: (@path, @identifier, @port, @arguments,
+  constructor: (@path, @identifier, @port, @host, @arguments,
                 @env, @urls, @autolaunch, @relaunch) ->
   
   @load: (dict) ->
@@ -25,6 +25,8 @@ class NoduleData
       throw new Error 'invaild identifier'
     if typeof dict.port isnt 'number'
       throw new Error 'invalid port'
+    if typeof dict.host isnt 'string'
+      throw new Error 'invalid host'
     if not dict.arguments instanceof Array
       throw new Error 'invaild arguments'
     if typeof dict.env isnt 'object'
@@ -52,6 +54,7 @@ class NoduleData
     return new NoduleData(dict.path,
                           dict.identifier,
                           dict.port,
+                          dict.host,
                           dict.arguments,
                           dict.env,
                           dict.urls,
