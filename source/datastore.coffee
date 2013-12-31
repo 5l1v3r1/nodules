@@ -101,7 +101,8 @@ class ProxyConfig
       return false if typeof obj.cert != 'string'
       if obj.ca?
         return false if not obj.ca instanceof Array
-        return false if typeof a != 'string' for a in obj.ca
+        for a in obj.ca
+          return false if typeof a != 'string'
     return true
 
 class Configuration
