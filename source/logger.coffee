@@ -13,6 +13,9 @@ class ProcessLogger
   handleData: (data) ->
     if not @output?
       @output = fs.createWriteStream @getOutputPath()
+      @output.on 'error', (e) =>
+        console.log 'error on log file: ' + e.toString()
+        @output = null
     @output.write data
   
   handleClose: ->
@@ -28,8 +31,9 @@ exports.logProcess = (task, logDir) ->
   fullPath = path.join logDir, 'log'
   createIfNotExists fullPath, (err) ->
     return console.log err if err
-    new ProcessLogger fullPath, task.stdout, 'stdout'
+    task.stderr.setEncoding 'binary'
     new ProcessLogger fullPath, task.stderr, 'stderr'
+    new ProcessLogger fullPath, task.stdout, 'stdout'
 
 createIfNotExists = (path, cb) ->
   fs.exists path, (exists) ->
