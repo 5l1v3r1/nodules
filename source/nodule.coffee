@@ -31,8 +31,8 @@ class Nodule
     logger.logProcess @process, @data.path
   
   stop: ->
-    @process.removeAllListeners?()
-    @process.kill?()
+    @process?.removeAllListeners?()
+    @process?.kill?()
     @process = null
 
   toJSON: ->
