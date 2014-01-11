@@ -70,6 +70,8 @@ addHelperMethod = (req, res, next) ->
   next()
 
 authenticator = (req, res, next) ->
+  if typeof req.query.password isnt 'string'
+    return res.sendJSON 400, error: 'missing password parameter'
   shasum = crypto.createHash 'sha1'
   shasum.update req.query.password
   digest = shasum.digest 'hex'
