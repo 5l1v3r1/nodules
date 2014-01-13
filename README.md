@@ -89,7 +89,7 @@ Nodule executes all its nodules as children of the `nodule-server` process. If y
 
 Nodule automatically saves the stdout and stderr of running nodules. These logs are saved to a `log/` subdirectory of every nodule. Note that logs are only created if the nodule actually *outputs* something. Since all logs are saved indefinitely, it is recommended that the nodules you provide only output to the console when an error occurs.
 
-# Using on top of Apache
+# Using with Apache
 
 Nodule is nice. Really nice. But what if you already have a web server configured? Well, you can create a new nodule! Checkout my [command nodule](https://gist.github.com/unixpickle/8202073). This nodule can be configured to start and stop Apache like this:
 
@@ -104,3 +104,11 @@ Nodule is nice. Really nice. But what if you already have a web server configure
         "/etc/init.d/apache2 stop"
 
 Now, just setup Apache to listen on port 8080, and nodule will forward it for you!
+
+# TODO
+
+* Run as different UID and GUID
+* Add nodule command to reload configuration
+* Add nodule restart to restart a nodule
+* Add nodule pipe websocket to pipe input/output from a nodule.
+* Add *log* flag to enable or disable logging for stderr and stdout
