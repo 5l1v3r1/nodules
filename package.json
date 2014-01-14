@@ -6,9 +6,11 @@
     "dependencies": {
         "express": "3.4.x",
         "coffee-script": "1.6.x",
-        "http-proxy": "0.10.x"
+        "http-proxy": "0.10.x",
+        "socket.io": "0.9.x",
+        "socket.io-client": "0.9.x"
     },
-    "version": "0.0.6",
+    "version": "0.1.0-pre",
     "licenses": [{
         "type": "GPL",
         "url": "http://www.gnu.org/licenses/gpl.html"

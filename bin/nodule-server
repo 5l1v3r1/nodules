@@ -1,8 +1,10 @@
 #!/usr/bin/env coffee
 
 express = require 'express'
-{datastore, Session, ControllableProxy} = require 'nodule'
+{datastore, Session, ControllableProxy, LogStream} = require 'nodule'
 crypto = require 'crypto'
+socketio = require 'socket.io'
+http = require 'http'
 
 nodule = null;
 proxy = null;
@@ -25,6 +27,7 @@ main = ->
 setup = (port, config) ->
   nodule = new Session config
   proxy = new ControllableProxy nodule
+  logStream = new LogStream nodule
   
   app = express()
   app.use addHelperMethod
@@ -57,7 +60,17 @@ setup = (port, config) ->
     res.sendJSON 404, error: 'unknown API call'
   
   # run the server and start the nodules
-  app.listen port
+  server = http.createServer app
+  io = socketio.listen server, log: false
+  io.configure ->
+    io.set 'authorization', (handshake, callback) ->
+      pass = handshake.query.password
+      if typeof pass isnt 'string'
+        return callback null, false
+      checkPassword pass, callback.bind null, null
+  io.sockets.on 'connection', logStream.connection.bind logStream
+  
+  server.listen port
   nodule.startup()
   proxy.startup (err) ->
     fail 'error starting proxy: ' + err if err
@@ -73,12 +86,17 @@ addHelperMethod = (req, res, next) ->
 authenticator = (req, res, next) ->
   if typeof req.query.password isnt 'string'
     return res.sendJSON 400, error: 'missing password parameter'
+  checkPassword req.query.password, (correct) ->
+    if not correct
+      res.sendJSON 401, error: 'missing/incorrect password'
+    else
+      next()
+
+checkPassword = (password, cb) ->
   shasum = crypto.createHash 'sha1'
-  shasum.update req.query.password
+  shasum.update password
   digest = shasum.digest 'hex'
-  if digest isnt nodule.datastore.password
-    res.sendJSON 401, error: 'missing/incorrect password'
-  else next()
+  return cb digest is nodule.datastore.password
 
 passwdHandler = (req, res) ->
   if typeof req.query.new != 'string'

@@ -9,6 +9,8 @@ logger = require './logger.coffee'
 class Nodule
   constructor: (@data) ->
     @process = null
+    @errorHandler = @_handleError.bind this
+    @exitHandler = @_handleExit.bind this
   
   isRunning: -> @process?
   
@@ -24,19 +26,15 @@ class Nodule
     params.uid = @data.uid if (@data.uid ? -1) >= 0
     params.gid = @data.gid if (@data.gid ? -1) >= 0
     @process = spawn command, args, params
-    @process.on 'exit', =>
-      @process = null
-      if @data.relaunch then @start()
-    @process.on 'error', (err) =>
-      console.log err
-      @process.kill()
-      @process = null
+    @process.on 'exit', @exitHandler
+    @process.on 'error', @errorHandler
     logger.logProcess @process, @data
     cb? null
   
   stop: (cb) ->
     return cb? new Error 'not running' if not @isRunning()
-    @process.removeAllListeners()
+    @process.removeListener 'exit', @exitHandler
+    @process.removeListener 'error', @errorHandler
     if cb
       @process.on 'exit', -> cb null
       @process.on 'error', (e) -> cb e
@@ -48,6 +46,15 @@ class Nodule
     dict.pid = @process.pid if @isRunning()
     dict[key] = obj for own key, obj of @data
     return dict
+  
+  _handleExit: ->
+    @process = null
+    if @data.relaunch then @start()
+  
+  _handleError: ->
+    console.log err
+    @process.kill()
+    @process = null
 
 class Session
   constructor: (@datastore) ->
