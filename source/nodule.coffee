@@ -14,9 +14,10 @@ class Nodule
   
   getPID: -> @process?.pid
   
-  start: ->
-    return if @isRunning()
-    throw new Error 'one argument needed' if @data.arguments.length == 0
+  start: (cb) ->
+    if @data.arguments.length == 0
+      return throw new Error 'one argument needed'
+    return cb? new Error 'already running' if @isRunning()
     command = @data.arguments[0]
     args = @data.arguments[1..]
     params = env: @data.env, cwd: @data.path
@@ -31,10 +32,15 @@ class Nodule
       @process.kill()
       @process = null
     logger.logProcess @process, @data
+    cb? null
   
-  stop: ->
-    @process?.removeAllListeners?()
-    @process?.kill?()
+  stop: (cb) ->
+    return cb? new Error 'not running' if not @isRunning()
+    @process.removeAllListeners()
+    if cb
+      @process.on 'exit', -> cb null
+      @process.on 'error', (e) -> cb e
+    @process.kill()
     @process = null
 
   toJSON: ->
@@ -87,23 +93,30 @@ class Session
       if nodule.data.identifier is newData.identifier
         # replace the nodule
         wasRunning = nodule.isRunning()
-        nodule.stop() if wasRunning
-        nodule.data = newData
-        @datastore.nodules[i] = newData
-        nodule.start() if wasRunning
-        # save and then callback
-        return @saveWithCallback res
+        return nodule.stop (e) => # e may be a 'not running' error
+          nodule.data = newData
+          @datastore.nodules[i] = newData
+          nodule.start() if wasRunning
+          return @saveWithCallback res
     res.sendJSON 404, error: 'nodule not found'
   
   start: (req, res) ->
     @findNodule req, res, (nodule, i) ->
-      nodule.start()
-      res.sendJSON 200, {}
+      nodule.start (e) ->
+        return res.sendJSON 500, {error: e.toString()} if e?
+        res.sendJSON 200, {}
   
   stop: (req, res) ->
     @findNodule req, res, (nodule, i) ->
-      nodule.stop()
-      res.sendJSON 200, {}
+      nodule.stop (e) ->
+        return res.sendJSON 500, {error: e.toString()} if e?
+        res.sendJSON 200, {}
+  
+  restart: (req, res) ->
+    @findNodule req, res, (nodule, i) =>
+      nodule.stop (e) =>
+        return res.sendJSON 500, {error: e.toString()} if e?
+        return @start req, res
   
   saveWithCallback: (res) ->
     @datastore.save (err) ->

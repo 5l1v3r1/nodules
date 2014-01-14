@@ -6,7 +6,7 @@ module.exports =
 
 commands = ['passwd', 'add', 'edit', 'list', 'start', 'stop', 'delete',
             'proxy-flag', 'proxy-status', 'proxy-stop', 'proxy-start',
-            'proxy-setcert']
+            'proxy-setcert', 'restart']
 
 for cmd in commands
   module.exports.commands[cmd] = require './control/' + cmd
