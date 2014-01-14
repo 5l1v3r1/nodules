@@ -13,7 +13,6 @@ module.exports = (argv) ->
   socket = io.connect 'http://localhost:' + port + '/?password=' + encPass
   socket.on 'error', (err) ->
     console.log err
-    console.log err.stack()
     process.exit 1
   socket.on 'disconnect', -> process.exit 0
   socket.on 'connect', ->
