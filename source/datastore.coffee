@@ -14,7 +14,7 @@ An object which represents the configuration of a nodule.
 class NoduleData
   
   constructor: (@path, @identifier, @port, @host, @arguments,
-                @env, @urls, @autolaunch, @relaunch) ->
+                @env, @urls, @autolaunch, @relaunch, @gid, @uid) ->
   
   @load: (dict) ->
     if typeof dict isnt 'object'
@@ -37,7 +37,11 @@ class NoduleData
       throw new Error 'invalid autolaunch'
     if typeof dict.relaunch isnt 'boolean'
       throw new Error 'invalid relaunch'
-      
+    if dict.uid? and typeof dict.uid isnt 'number'
+      throw new Error 'invalid UID'
+    if dict.gid? and typeof dict.gid isnt 'number'
+      throw new Error 'invalid GID'
+    
     # verify the types within arrays
     for url in dict.urls
       if typeof url isnt 'string'
@@ -59,7 +63,9 @@ class NoduleData
                           dict.env,
                           dict.urls,
                           dict.autolaunch,
-                          dict.relaunch)
+                          dict.relaunch,
+                          dict.gid ? null,
+                          dict.uid ? null)
 
   @mapload: (list) -> @load d for d in list
 

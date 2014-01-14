@@ -107,7 +107,6 @@ Now, just setup Apache to listen on port 8080, and nodule will forward it for yo
 
 # TODO
 
-* Run as different UID and GUID
 * Add nodule command to reload configuration
 * Add nodule restart to restart a nodule
 * Add nodule pipe websocket to pipe input/output from a nodule.

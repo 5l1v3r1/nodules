@@ -30,6 +30,14 @@ class NoduleArgs
         @autolaunch = true
       else if arg is '--autorelaunch'
         @relaunch = true
+      else if arg is '--uid'
+        throw 'missing UID' if i is index - 1
+        if isNaN @uid = parseInt argv[++i]
+          throw 'invalid UID'
+      else if arg is '--gid'
+        throw 'missing GID' if i is index - 1
+        if isNaN @gid = parseInt argv[++i]
+          throw 'invalid GID'
       else throw 'unknown argument: ' + arg
       i++
     
@@ -45,8 +53,8 @@ class NoduleArgs
   
   @usage: ->
     str = '<path> <identifier> <port> <host> [--envvar=envval, ...]\n' +
-          '       [--url x, ...] [--autolaunch] [--autorelaunch]' +
-          ' --args <args>'
+          '       [--url x, ...] [--autolaunch] [--autorelaunch]\n' +
+          '       [--gid <n>] [--uid <n>] --args <args>'
     return str
 
 exports.NoduleArgs = NoduleArgs;

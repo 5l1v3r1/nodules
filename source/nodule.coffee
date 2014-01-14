@@ -20,6 +20,8 @@ class Nodule
     command = @data.arguments[0]
     args = @data.arguments[1..]
     params = env: @data.env, cwd: @data.path
+    params.uid = @data.uid if (@data.uid ? -1) >= 0
+    params.gid = @data.gid if (@data.gid ? -1) >= 0
     @process = spawn command, args, params
     @process.on 'exit', =>
       @process = null
@@ -28,7 +30,7 @@ class Nodule
       console.log err
       @process.kill()
       @process = null
-    logger.logProcess @process, @data.path
+    logger.logProcess @process, @data
   
   stop: ->
     @process?.removeAllListeners?()
