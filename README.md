@@ -96,15 +96,15 @@ Nodule executes all its nodules as children of the `nodule-server` process. If y
 
 Nodule automatically saves the standard output and standard error of running nodules. These logs are saved to a `log/` subdirectory of every nodule. If you specify the `--logstreams` argument to `nodule add`, you can choose which file descriptors are logged.  To log both streams, use `--logstreams stderr,stdout` (the default). For just one, use `--logstreams stdout`, for example. If you would like *no* log files, use `--logstreams ''`.  Note that log files are only created if the nodule actually *outputs* something. Since all logs are saved indefinitely, it is recommended that the nodules you provide only output to `stderr` when an error occurs, and use `stdout` for everything else.
 
-## Output Streaming!
+### Output Streaming!
 
-This is by **far** the coolest feature of nodule. Let's suppose you are running a web server which logs errors to `stderr`. Simple enough, just use `--logstreams stderr` to save these to a file so you can look at them later. But now suppose you want to, on occasion, see a live log of page requests to the server. You would, in this case, make your server log page requests to `stdeout`. But wait, it wouldn't be appropriate to save `stdout` to a regular log file, because the file would quickly grow and you'd have to `cat` it every time you want to view the log.
+This is by **far** the coolest feature of nodule. Let's suppose you are running a web server which logs errors to `stderr`. Simple enough, just use `--logstreams stderr` to save these to a file so you can look at them later. But now suppose you want to, on occasion, see a live log of page requests to the server. You would, in this case, make your server log page requests to `stdout`. But wait, it wouldn't be appropriate to save `stdout` to a regular log file, because the file would quickly grow and you'd have to `cat` it every time you want to view the log.
 
 Nodule provides a really simple solution to this. In the case above, you should only log your `stderr` stream to a file, as dictated. Then, whenever you want to view a live feed of the process's `stdout`, run this:
 
     nodule stream password 8000 noduleName 2>/dev/null
 
-This will log the `stdout` from the nodule named `noduleName`. If you want to view both `stderr` and `stdout`, remove the `2>/dev/null`. The `nodule stream` command harmlessly taps into the process's output streams. This will not interfere with normal file logging, and multiple log streams can be open at once to the same process. Internally, `nodule` uses WebSockets to do this. 
+This will pipe the `stdout` from the nodule named `noduleName` to your terminal window. If you want to view both `stderr` and `stdout`, remove the `2>/dev/null`. The `nodule stream` command harmlessly taps into the process's output streams. This will not interfere with normal file logging, and multiple log streams can be open at once to the same process. Internally, `nodule` uses WebSockets to do this. After running `nodule stream`, you can press Control+C to tap out of the stream. The command will exit on its own if the nodule process is terminated.
 
 # Using with Apache
 
