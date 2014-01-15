@@ -108,5 +108,3 @@ Now, just setup Apache to listen on port 8080, and nodule will forward it for yo
 # TODO
 
 * Add nodule command to reload configuration
-* Add nodule pipe websocket to pipe input/output from a nodule.
-* Add *log* flag to enable or disable logging for stderr and stdout
