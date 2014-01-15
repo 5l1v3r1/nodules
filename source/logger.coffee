@@ -29,12 +29,22 @@ class ProcessLogger
 
 exports.ProcessLogger = ProcessLogger
 exports.logProcess = (task, info) ->
+  if info.logstreams.length is 0
+    # we don't want the process streams to buffer internally
+    task.stderr.on 'data', ->
+    task.stdout.on 'data', -> 
+    return
+  
   logDir = info.path
   fullPath = path.join logDir, 'log'
   createIfNotExists fullPath, info, (err) ->
     return console.log err if err?
-    new ProcessLogger fullPath, task.stderr, 'stderr', info
-    new ProcessLogger fullPath, task.stdout, 'stdout', info
+    if 'stderr' in info.logstreams
+      new ProcessLogger fullPath, task.stderr, 'stderr', info
+    else task.stderr.on 'data', (d) -> # prevent internal buffering
+    if 'stdout' in info.logstreams
+      new ProcessLogger fullPath, task.stdout, 'stdout', info
+    else task.stdout.on 'data', -> # prevent internal buffering
 
 createIfNotExists = (path, info, cb) ->
   fs.exists path, (exists) ->

@@ -16,6 +16,7 @@ class NoduleArgs
     @autolaunch = false
     @relaunch = false
     @host = argv[3]
+    @logstreams = ['stdout', 'stderr']
     
     # process the URLs and environment variables
     i = 4
@@ -38,6 +39,16 @@ class NoduleArgs
         throw 'missing GID' if i is index - 1
         if isNaN @gid = parseInt argv[++i]
           throw 'invalid GID'
+      else if arg is '--logstreams'
+        throw 'missing logstreams' if i is index - 1
+        argument = argv[++i]
+        if argument.length == 0
+          @logstreams = []
+        else
+          @logstreams = argument.split ','
+          for obj in @logstreams
+            if not (obj in ['stdout', 'stderr'])
+              throw 'unknown stream: ' + obj
       else throw 'unknown argument: ' + arg
       i++
     
@@ -54,7 +65,8 @@ class NoduleArgs
   @usage: ->
     str = '<path> <identifier> <port> <host> [--envvar=envval, ...]\n' +
           '       [--url x, ...] [--autolaunch] [--autorelaunch]\n' +
-          '       [--gid <n>] [--uid <n>] --args <args>'
+          '       [--gid <n>] [--uid <n>] [--logstreams s1,s2,...]\n' +
+          '       --args <args>'
     return str
 
 exports.NoduleArgs = NoduleArgs;
