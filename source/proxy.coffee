@@ -210,7 +210,7 @@ class ControllableProxy extends Proxy
       nodule = aNodule.data
       for aURL in nodule.urls
         aParsed = url.parse aURL
-        aComps = path.normalize(aParsed.pathname).split '/'
+        aComps = path.normalize(aParsed.pathname ? '/').split '/'
         continue if aParsed.host isnt hostname
         continue if aComps.length < matchedComps.length
         continue if aParsed.protocol isnt usedProtocol
